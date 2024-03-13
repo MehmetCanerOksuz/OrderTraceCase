@@ -3,23 +3,19 @@ package org.caneroksuz.service;
 import org.caneroksuz.dto.request.OrderRequestDto;
 import org.caneroksuz.dto.response.GetCustomerDto;
 import org.caneroksuz.dto.response.OrderResponseDto;
-import org.caneroksuz.dto.response.ProductResponseDto;
 import org.caneroksuz.exception.ErrorType;
 import org.caneroksuz.exception.OrderManagerException;
 import org.caneroksuz.exception.ProductManagerException;
 import org.caneroksuz.manager.IOrderManager;
 import org.caneroksuz.mapper.IOrderMapper;
-import org.caneroksuz.mapper.IProductMapper;
 import org.caneroksuz.repository.IOrderRepository;
-import org.caneroksuz.repository.IProductRepository;
 import org.caneroksuz.repository.entity.Order;
+import org.caneroksuz.repository.entity.OrderProduct;
 import org.caneroksuz.repository.entity.Product;
 import org.caneroksuz.utility.ServiceManager;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 
@@ -52,68 +48,80 @@ public class OrderService extends ServiceManager<Order, Long> {
     }
 
     public String addProduct(Long orderId, Long productId) {
-
-        Optional<Order> order = findById(orderId);
-        if (order.isEmpty()){
+        Optional<Order> orderOptional = findById(orderId);
+        if (orderOptional.isEmpty()) {
             throw new OrderManagerException(ErrorType.ORDER_NOT_FOUND);
         }
-        Optional<Product> product = productService.findById(productId);
-        if (product.isEmpty()){
+
+        Order order = orderOptional.get();
+
+        Optional<Product> productOptional = productService.findById(productId);
+        if (productOptional.isEmpty()) {
             throw new ProductManagerException(ErrorType.PRODUCT_NOT_FOUND);
         }
 
+        Product product = productOptional.get();
+
         boolean productExists = false;
-        for (Product product1 : order.get().getProducts() ){
-            if (product1.getId().equals(product.get().getId())){
+        for (OrderProduct orderProduct : order.getOrderProducts()) {
+            if (orderProduct.getProduct().getId().equals(product.getId())) {
+                orderProduct.setQuantity(orderProduct.getQuantity() + 1);
                 productExists = true;
-                product1.setQuantity(product1.getQuantity()+product.get().getQuantity());
                 break;
             }
         }
 
-        if (!productExists){
-            order.get().getProducts().add(product.get());
-        }
+        if (!productExists) {
 
-        update(order.get());
+            OrderProduct newOrderProduct = new OrderProduct();
+            newOrderProduct.setOrder(order);
+            newOrderProduct.setProduct(product);
+            newOrderProduct.setQuantity(1);
+            order.getOrderProducts().add(newOrderProduct);
+        }
+        update(order);
 
         return "Ürün başarılı bir şekilde eklendi.";
-
     }
 
     public String removeProduct(Long orderId, Long productId) {
-        Optional<Order> order = findById(orderId);
-        if (order.isEmpty()){
+        Optional<Order> orderOptional = findById(orderId);
+        if (orderOptional.isEmpty()) {
             throw new OrderManagerException(ErrorType.ORDER_NOT_FOUND);
         }
-        Optional<Product> product = productService.findById(productId);
-        if (product.isEmpty()){
+
+        Order order = orderOptional.get();
+
+        Optional<Product> productOptional = productService.findById(productId);
+        if (productOptional.isEmpty()) {
             throw new ProductManagerException(ErrorType.PRODUCT_NOT_FOUND);
         }
+
+        Product product = productOptional.get();
+
         boolean productExists = false;
-        for (Product product1 : order.get().getProducts() ){
-            if (product1.getId().equals(product.get().getId())){
-                if(product1.getQuantity()==product.get().getQuantity()){
-                    order.get().getProducts().remove(product1);
+        for (OrderProduct orderProduct : order.getOrderProducts()) {
+            if (orderProduct.getProduct().getId().equals(product.getId())) {
+                if (orderProduct.getQuantity() == product.getQuantity()) {
+                    order.getOrderProducts().remove(orderProduct);
                     productExists = true;
                     break;
                 }
-                if(product1.getQuantity()>product.get().getQuantity()){
-                    product1.setQuantity(product1.getQuantity()-product.get().getQuantity());
+                if (orderProduct.getQuantity() > product.getQuantity()) {
+                    orderProduct.setQuantity(orderProduct.getQuantity() - product.getQuantity());
                     productExists = true;
                     break;
                 }
             }
         }
 
-        if (!productExists){
+        if (!productExists) {
             throw new OrderManagerException(ErrorType.PRODUCT_NOT_FOUND_IN_ORDER);
         }
 
-        update(order.get());
+        update(order);
 
         return "Ürün başarılı bir şekilde silindi.";
-
     }
 
     public String  updateOrder(Long orderId, OrderRequestDto orderRequestDto) {
@@ -136,7 +144,22 @@ public class OrderService extends ServiceManager<Order, Long> {
 
     public List<OrderResponseDto> findAllOrder() {
         List<Order> orders = findAll();
-        return orders.stream().map(x-> IOrderMapper.INSTANCE.toOrderResponseDto(x)).collect(Collectors.toList());
+        List<OrderResponseDto> orderResponseDtos = new ArrayList<>();
+
+        for (Order order : orders) {
+            OrderResponseDto orderResponseDto = new OrderResponseDto();
+            orderResponseDto.setCustomerId(order.getCustomerId());
+
+            Map<Product, Integer> productQuantities = new HashMap<>();
+            for (OrderProduct orderProduct : order.getOrderProducts()) {
+                productQuantities.put(orderProduct.getProduct(), orderProduct.getQuantity());
+            }
+            orderResponseDto.setProductQuantities(productQuantities);
+
+            orderResponseDtos.add(orderResponseDto);
+        }
+
+        return orderResponseDtos;
     }
 
 
@@ -146,7 +169,16 @@ public class OrderService extends ServiceManager<Order, Long> {
             throw new OrderManagerException(ErrorType.ORDER_NOT_FOUND);
         }
 
-        return IOrderMapper.INSTANCE.toOrderResponseDto(order.get());
+        OrderResponseDto orderResponseDto = new OrderResponseDto();
+        orderResponseDto.setCustomerId(order.get().getCustomerId());
+
+        Map<Product, Integer> productQuantities = new HashMap<>();
+        for (OrderProduct orderProduct : order.get().getOrderProducts()) {
+            productQuantities.put(orderProduct.getProduct(), orderProduct.getQuantity());
+        }
+        orderResponseDto.setProductQuantities(productQuantities);
+
+        return orderResponseDto;
     }
 
     public String deleteByIdOrder(Long id) {

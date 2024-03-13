@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.caneroksuz.repository.entity.Product;
 
+
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,5 +17,5 @@ import java.util.List;
 public class OrderResponseDto {
 
     private Long customerId;
-    private List<Product> products;
+    private Map<Product, Integer> productQuantities;
 }
