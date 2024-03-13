@@ -1,0 +1,41 @@
+version: '3.1'
+
+networks:
+  smartera_network:
+    driver: bridge
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: smartera_rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=root
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - smartera_network
+
+  postgres-customer:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: customerDB
+    ports:
+      - "5432:5432"
+    networks:
+      - smartera_network
+
+  postgres-order:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: orderDB
+    ports:
+      - "5433:5432"
+    networks:
+      - smartera_network

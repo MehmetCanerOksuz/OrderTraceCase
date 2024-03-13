@@ -1,0 +1,45 @@
+server:
+  port: 80
+spring:
+  main:
+    web-application-type: reactive
+    banner-mode: off
+  application:
+    name: api-gateway-service
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "*"
+            allowed-headers: "*"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+      routes:
+        - id: customer-service
+          predicates:
+            - Path=/customer/**
+          uri: http://localhost:7071        #localhost:7071/api/v1/customer
+          filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            - name: CircuitBreaker
+              args:
+                enabled: true
+                fallbackUri: forward:/fallback/customer_service
+
+        - id: order-service
+          predicates:
+            - Path=/order/**
+          uri: http://localhost:7072
+          filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            - name: CircuitBreaker
+              args:
+                enabled: true
+                fallbackUri: forward:/fallback/order_service
+
+      default-filters:
+        - RewritePath= /(?<segment>.*),/api/v1/$\{segment}   #regex yazımı

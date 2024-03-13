@@ -1,0 +1,27 @@
+server:
+  port: 7071
+spring:
+  main:
+    banner-mode: off
+  security:
+    user:
+      name: user
+      password: 123456789
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: root
+  datasource:
+    username: admin
+    password: root
+    url: jdbc:postgresql://localhost:5432/customerDB
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+rabbitmq:
+
+

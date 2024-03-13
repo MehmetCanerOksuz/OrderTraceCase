@@ -1,0 +1,6 @@
+rootProject.name = 'OrderTraceCase'
+include 'api-gateway-service'
+include 'config-server'
+include 'customer-service'
+include 'order-service'
+

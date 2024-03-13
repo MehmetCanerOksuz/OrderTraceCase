@@ -1,0 +1,30 @@
+package org.caneroksuz.repository.entity;
+
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
+@Entity
+@Table(name = "tbl_order")
+public class Order extends BaseEntity{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private Long customerId;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Product> products =new ArrayList<>();
+
+
+
+}
