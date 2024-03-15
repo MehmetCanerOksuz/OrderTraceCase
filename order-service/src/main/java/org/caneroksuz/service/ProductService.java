@@ -41,7 +41,11 @@ public class ProductService extends ServiceManager <Product, Long> {
             throw new ProductManagerException(ErrorType.PRODUCT_NOT_FOUND);
         }
         Long createDate = product.get().getCreateDate();
-        product = Optional.of(IProductMapper.INSTANCE.toProduct(dto));
+       // product = Optional.of(IProductMapper.INSTANCE.toProduct(dto));
+        product.get().setBrand(dto.getBrand());
+        product.get().setModel(dto.getModel());
+        product.get().setPrice(dto.getPrice());
+        product.get().setQuantity(dto.getQuantity());
         product.get().setCreateDate(createDate);
         product.get().setId(id);
         update(product.get());

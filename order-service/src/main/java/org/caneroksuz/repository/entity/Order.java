@@ -22,6 +22,7 @@ public class Order extends BaseEntity{
     private Long id;
     private Long customerId;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
 
