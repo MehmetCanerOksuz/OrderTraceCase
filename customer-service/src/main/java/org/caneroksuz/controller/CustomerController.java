@@ -40,8 +40,8 @@ public class CustomerController {
     }
 
     @DeleteMapping("/delete-by-id")
-    public ResponseEntity<String> deleteByEmail(Long id){
-        return ResponseEntity.ok(customerService.deleteByEmail(id));
+    public ResponseEntity<String> deleteById(Long id){
+        return ResponseEntity.ok(customerService.deleteByIdCustomer(id));
     }
 
 }

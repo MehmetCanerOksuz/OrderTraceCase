@@ -75,7 +75,7 @@ public class CustomerService extends ServiceManager<Customer,Long> {
         .build();
     }
 
-    public String deleteByEmail(Long id) {
+    public String deleteByIdCustomer(Long id) {
         Optional<Customer> customer = customerRepository.findById(id);
         if (customer.isEmpty()){
             throw new CustomerManagerException(ErrorType.CUSTOMER_NOT_FOUND);

@@ -49,8 +49,14 @@ allprojects {
         implementation libs.javaJwt
         implementation libs.springBootRabbitMq
         implementation libs.springCloudOpenFeign
+        implementation libs.springBootTest
+        implementation libs.junit
 
 
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
     }
 }
 
