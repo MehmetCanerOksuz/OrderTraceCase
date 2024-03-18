@@ -132,7 +132,8 @@ public class OrderService extends ServiceManager<Order, Long> {
         }
 
         Long createDate = order.get().getCreateDate();
-        order = Optional.of(IOrderMapper.INSTANCE.toOrder(orderRequestDto));
+        order.get().setCustomerId(orderRequestDto.getCustomerId());
+        order.get().setOrderProducts(orderRequestDto.getOrderProducts());
         order.get().setId(orderId);
         order.get().setCreateDate(createDate);
         update(order.get());
